@@ -7,14 +7,14 @@
 
 ## 📌 Project Overview
 
-This project serves as a critical bridge from **rule-based heuristic logic** to true **Supervised Learning**. Rather than explicitly writing complex nested rules, this system leverages historical vector features to enable machines to derive optimal decision boundaries independently.
+This project serves as a critical bridge from **rule-based heuristic logic** to true **Supervised Learning**. Rather than explicitly writing complex nested rules, this system leverages historical patterns to make intelligent predictions on new, unseen data.
 
 Using the **Iris Benchmark Dataset**, this module implements a complete machine learning pipeline including:
 - Raw data ingestion and exploration
-- Feature scaling and validation
-- Random shuffling and train-test splits
-- Algorithmic pattern recognition
-- Performance metrics and reporting
+- Feature scaling and validation (StandardScaler normalization)
+- Random shuffling and train-test splits (80/20)
+- K-Nearest Neighbors (KNN) algorithmic pattern recognition
+- Performance metrics and reporting (Accuracy, Confusion Matrix, F1 Score)
 
 ## ✨ Key Features
 
@@ -40,11 +40,12 @@ Using the **Iris Benchmark Dataset**, this module implements a complete machine 
 - **Classification Algorithm**: K-Nearest Neighbors (KNN)
   - Lazy-learning metric clustering approach
   - Categorizes new samples based on vector proximity distances
+  - n_neighbors = 3 (tunable parameter)
 
 #### **3. Output Layer**
 - **Accuracy Score**: Measures true generalization capability on unseen data
 - **Confusion Matrix**: Cross-tabulation showing true vs. predicted class distribution
-- **F1 Score**: Macro-averaged performance metric for multi-class harmony
+- **F1 Score (Macro)**: Balanced performance metric for multi-class harmony
 
 ---
 
@@ -55,8 +56,6 @@ Using the **Iris Benchmark Dataset**, this module implements a complete machine 
 Python 3.7+
 scikit-learn
 numpy
-pandas
-matplotlib (for visualizations)
 ```
 
 ### Installation
@@ -68,16 +67,13 @@ git clone https://github.com/idrisrafaqat18/data-classification-using-ai.git
 cd data-classification-using-ai
 
 # Install dependencies
-pip install -r requirements.txt
+pip install scikit-learn numpy
 ```
 
 ### Usage
 ```bash
 # Run the classification pipeline
-python main.py
-
-# Or run with custom parameters
-python main.py --test-size 0.2 --random-state 42
+python dc.py
 ```
 
 ---
@@ -99,9 +95,7 @@ python main.py --test-size 0.2 --random-state 42
 | Component | Purpose |
 |-----------|---------|
 | **scikit-learn** | ML pipeline, KNN algorithm, metrics |
-| **pandas** | Data manipulation and exploration |
 | **numpy** | Numerical computations |
-| **matplotlib/seaborn** | Data visualization |
 
 ---
 
@@ -115,12 +109,22 @@ The model evaluation includes three key metrics:
 
 ### Expected Output Example
 ```
-Accuracy Score: 0.97
-Confusion Matrix:
+=============================================
+             VERIFICATION REPORT             
+=============================================
+ Model Selected : K-Nearest Neighbors (KNN)
+ Test Accuracy  : 96.67%
+ Macro F1 Score : 0.9667
+---------------------------------------------
+ CONFUSION MATRIX:
 [[10  0  0]
  [ 0  9  1]
  [ 0  0 10]]
-F1 Score (Macro): 0.97
+
+ Matrix Layout:
+  Rows   : Actual Classes (setosa, versicolor, virginica)
+  Columns: Predicted Classes (setosa, versicolor, virginica)
+=============================================
 ```
 
 ---
@@ -142,16 +146,9 @@ Students mastering this project will understand:
 
 ```
 data-classification-using-ai/
-├── README.md
-├── requirements.txt
-├── main.py
-├── data/
-│   └── iris.csv
-└── src/
-    ├── data_loader.py
-    ├── preprocessing.py
-    ├── model.py
-    └── evaluation.py
+├── README.md          # Project documentation
+├── dc.py              # Main classification pipeline
+└── requirements.txt   # Dependencies (optional)
 ```
 
 ---
@@ -161,24 +158,24 @@ data-classification-using-ai/
 ```
 1. Load Dataset (Iris)
    ↓
-2. Explore & Validate Data
+2. Apply Feature Scaling (StandardScaler)
    ↓
-3. Apply Feature Scaling (StandardScaler)
+3. Randomize & Split Data (80% train, 20% test)
    ↓
-4. Randomize & Split Data (80% train, 20% test)
+4. Train KNN Model (n_neighbors=3)
    ↓
-5. Train KNN Model
+5. Generate Predictions on Test Set
    ↓
-6. Generate Predictions
+6. Calculate Metrics (Accuracy, Confusion Matrix, F1 Score)
    ↓
-7. Calculate Metrics (Accuracy, Confusion Matrix, F1 Score)
-   ↓
-8. Output Results
+7. Display Verification Report
 ```
 
 ---
 
-## 📝 Code Example
+## 📝 Code Implementation
+
+The main implementation in `dc.py` follows these steps:
 
 ```python
 from sklearn.datasets import load_iris
@@ -187,28 +184,33 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 
-# Load data
+# Step 1: Load Dataset
 iris = load_iris()
 X, y = iris.data, iris.target
 
-# Scale features
+# Step 2: Scale Features
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Split data
+# Step 3: Split Data
 X_train, X_test, y_train, y_test = train_test_split(
-    X_scaled, y, test_size=0.2, random_state=42, shuffle=True
+    X_scaled, y, test_size=0.20, random_state=42, shuffle=True
 )
 
-# Train KNN model
-knn = KNeighborsClassifier(n_neighbors=3)
-knn.fit(X_train, y_train)
+# Step 4: Train KNN Model
+knn_model = KNeighborsClassifier(n_neighbors=3)
+knn_model.fit(X_train, y_train)
 
-# Evaluate
-y_pred = knn.predict(X_test)
-print(f"Accuracy: {accuracy_score(y_test, y_pred)}")
-print(f"Confusion Matrix:\n{confusion_matrix(y_test, y_pred)}")
-print(f"F1 Score: {f1_score(y_test, y_pred, average='macro')}")
+# Step 5: Evaluate Model
+y_pred = knn_model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+macro_f1 = f1_score(y_test, y_pred, average='macro')
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+# Step 6: Display Results
+print(f"Accuracy: {accuracy * 100:.2f}%")
+print(f"F1 Score: {macro_f1:.4f}")
+print(f"Confusion Matrix:\n{conf_matrix}")
 ```
 
 ---
@@ -250,7 +252,7 @@ This project is part of the DecodeLabs Industrial Training Kit (Batch 2026).
 
 ## ⚡ Quick Tips
 
-- **Tuning KNN**: Experiment with different `n_neighbors` values (3, 5, 7)
+- **Tuning KNN**: Experiment with different `n_neighbors` values (3, 5, 7, 9)
 - **Random State**: Use `random_state=42` for reproducible results
 - **Feature Importance**: Try visualizing feature distributions with matplotlib
 - **Cross-Validation**: Consider k-fold cross-validation for more robust metrics
